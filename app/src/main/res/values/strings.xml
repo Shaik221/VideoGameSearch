@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Video Game Search</string>
+    <string name="search_hint">Search Game</string>
+</resources>
