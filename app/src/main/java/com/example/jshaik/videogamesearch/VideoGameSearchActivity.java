@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jshaik.videogamesearch.adapter.CustomSearchAdapter;
@@ -15,36 +17,38 @@ import com.example.jshaik.videogamesearch.beans.GamesListData;
 import com.example.jshaik.videogamesearch.beans.GamesResultsData;
 import com.example.jshaik.videogamesearch.service.GetNoticeDataService;
 import com.example.jshaik.videogamesearch.service.RetrofitInstance;
+import com.example.jshaik.videogamesearch.utils.Constants;
+import com.example.jshaik.videogamesearch.utils.ImageHandler;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+/*Retrofit*/
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-/*Retrofit*/
-
 
 public class VideoGameSearchActivity extends AppCompatActivity {
 
     private ProgressDialog pDialog;
     private RecyclerView recyclerView;
+    private TextView textView;
     private CustomSearchAdapter adapter;
-    private String url;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.searchable_layout);
-        url = "http://www.giantbomb.com/api/search/";
 
+        //setting picaso builder as single instance for whole application
+        ImageHandler.setCustomPicasoBuilder(getApplicationContext());
+
+        setContentView(R.layout.searchable_layout);
         recyclerView = findViewById(R.id.listView);
+        textView = findViewById(R.id.noData);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(VideoGameSearchActivity.this);
         recyclerView.setLayoutManager(layoutManager);
         pDialog = new ProgressDialog(this);
-        pDialog.setMessage("Loading Game Details...");
+        pDialog.setMessage(getString(R.string.pdig_message));
         // search
         handleSearch();
     }
@@ -61,17 +65,17 @@ public class VideoGameSearchActivity extends AppCompatActivity {
             String searchQuery = intent.getStringExtra(SearchManager.QUERY);
 
             Map<String, String> params = new HashMap<String, String>();
-            params.put("api_key", "d87ade79924e10f6e84bb3375780928b0d0ca4f6");
-            params.put("format", "json");
+            params.put("api_key", Constants.API_KEY);
+            params.put("format", Constants.SCHEMA_TYPE);
             params.put("query", searchQuery);
-            params.put("limit", "20");
-            params.put("resources", "game");
+            params.put("limit", Constants.PAGE_LIMIT);
+            params.put("resources", Constants.RESOURCE_TYPE);
 
             /** Create handle for the RetrofitInstance interface*/
             GetNoticeDataService service = RetrofitInstance.getRetrofitInstance().create(GetNoticeDataService.class);
 
             /** Call the method with parameter in the interface to get the notice data*/
-            Call<GamesListData> call = service.gamesList(url, params);
+            Call<GamesListData> call = service.gamesList(Constants.BASE_URL, params);
 
             /**Log the URL called*/
             Log.d("URL Called", call.request().url() + "");
@@ -101,7 +105,15 @@ public class VideoGameSearchActivity extends AppCompatActivity {
 
     /* Method to show List of games using RecyclerView with custom adapter*/
     private void gamesListData(List<GamesResultsData> noticeArrayList) {
-       adapter = new CustomSearchAdapter(VideoGameSearchActivity.this,noticeArrayList);
-       recyclerView.setAdapter(adapter);
+        if (noticeArrayList != null && noticeArrayList.size() > 0 ) {
+            textView.setVisibility(View.GONE);
+            adapter = new CustomSearchAdapter(VideoGameSearchActivity.this, noticeArrayList);
+            recyclerView.setAdapter(adapter);
+        }
+        else {
+            textView.setVisibility(View.VISIBLE);
+            textView.setText("No Data Found!!");
+        }
     }
+
 }

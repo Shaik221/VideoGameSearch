@@ -2,6 +2,7 @@ package com.example.jshaik.videogamesearch.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,16 +10,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.jshaik.videogamesearch.R;
-import com.example.jshaik.videogamesearch.beans.GamesListData;
 import com.example.jshaik.videogamesearch.beans.GamesResultsData;
+import com.example.jshaik.videogamesearch.utils.Constants;
 import com.squareup.picasso.Picasso;
 import java.util.List;
 
 public class CustomSearchAdapter extends RecyclerView.Adapter<CustomSearchAdapter.MyViewHolder> {
 
-    private GamesListData gamesListData;
     private List<GamesResultsData> dataSet;
     private Context mContext;
+    private String TAG = this.getClass().getName();
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -46,24 +47,49 @@ public class CustomSearchAdapter extends RecyclerView.Adapter<CustomSearchAdapte
         //view.setOnClickListener(MainActivity.myOnClickListener);
 
         MyViewHolder myViewHolder = new MyViewHolder(view);
+
         return myViewHolder;
     }
 
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int listPosition) {
         Context context = holder.imageViewIcon.getContext();
+        GamesResultsData item = dataSet.get(listPosition);
+
         TextView textViewName = holder.textViewName;
         ImageView imageView = holder.imageViewIcon;
 
-        textViewName.setText(dataSet.get(listPosition).getAliases());
+        //setting game name
+        textViewName.setText(dataSet.get(listPosition).getName());
 
-        Picasso.with(context)
-                .load(dataSet.get(listPosition).getImage().getIconUrl())
-                .resize(50,50).into(imageView);
+        String imString = dataSet.get(listPosition).getImage().getIconUrl();
+
+        //if there is no icon url available then we have to cancel the request for memory utilization
+        if ( imString != null && !imString.isEmpty() )
+        {
+            try {
+                //library to load the images from url
+                loadImageWithCustomPicasso(imageView, listPosition);
+                //ImageHandler.getSharedInstance(mContext).load(imString).skipMemoryCache().resize(Constants.IMG_WIDTH, Constants.IMG_HEIGHT).into(imageView, null);
+            } catch (Exception e) {
+                Log.e(TAG,"Exception Occurred::"+e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        holder.itemView.setTag(item);
     }
 
     @Override
     public int getItemCount() {
         return dataSet.size();
     }
+
+    //for loading images in the imageView
+    public void loadImageWithCustomPicasso(ImageView imageView, int position){
+        Picasso.with(imageView.getContext().getApplicationContext())
+                .load(dataSet.get(position).getImage().getIconUrl())
+                .resize(Constants.IMG_WIDTH, Constants.IMG_HEIGHT)
+                .into(imageView);
+    }
+
 }
