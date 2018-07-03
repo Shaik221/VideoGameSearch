@@ -16,8 +16,8 @@ import com.example.jshaik.videogamesearch.VideoGameSearchApplication;
 import com.example.jshaik.videogamesearch.di.component.DaggerApplicationComponent;
 import com.example.jshaik.videogamesearch.di.contract.GamesListContract;
 import com.example.jshaik.videogamesearch.di.module.ApplicationModule;
-import com.example.jshaik.videogamesearch.model.beans.GamesResultsData;
 import com.example.jshaik.videogamesearch.model.adapter.CustomSearchAdapter;
+import com.example.jshaik.videogamesearch.model.beans.GamesResultsData;
 import com.example.jshaik.videogamesearch.presenter.GamesListPresenter;
 import com.example.jshaik.videogamesearch.utils.ImageHandler;
 import com.example.jshaik.videogamesearch.utils.NetworkHandler;
@@ -40,7 +40,6 @@ public class VideoGameSearchActivity extends AppCompatActivity implements GamesL
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.searchable_layout);
-
         DaggerApplicationComponent.builder()
                 .netComponent(((VideoGameSearchApplication)getApplication().getApplicationContext()).getNetComponent())
                 .applicationModule(new ApplicationModule(this))
@@ -69,7 +68,6 @@ public class VideoGameSearchActivity extends AppCompatActivity implements GamesL
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String searchQuery = intent.getStringExtra(SearchManager.QUERY);
-
             //check internet connectiviy and then fire the request
             if(NetworkHandler.isNetworkAvailable(this)) {
                 pDialog.show();
